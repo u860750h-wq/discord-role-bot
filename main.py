@@ -38,3 +38,23 @@ def run():
 
 threading.Thread(target=run).start()
 bot.run(TOKEN)
+
+@app.route("/webhook", methods=["POST"])
+def webhook():
+    data = request.json
+    username = data.get("discord_username")  # 例: "hijirimitsui#1234"
+
+    print(f"受け取ったユーザー名: {username}")
+
+    guild = bot.get_guild(GUILD_ID)
+    member = discord.utils.find(lambda m: str(m) == username, guild.members)
+    role = guild.get_role(ROLE_ID)
+
+    if member and role:
+        bot.loop.create_task(member.add_roles(role))
+        print(f"ロールを付与しました: {member}")
+        return "ロール付与成功！", 200
+    else:
+        print(f"ユーザーまたはロールが見つかりません: {username}")
+        return f"ユーザーまたはロールが見つかりません: {username}", 400
+
